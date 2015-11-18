@@ -1,0 +1,7 @@
+server {
+  listen 80;
+  server_name {{ ansible_fqdn }};
+  root {{ redmine_root_dir }}/public;
+  passenger_enabled on;
+  passenger_env_var GEM_PATH {{ redmine_root_dir }}/vendor/bundle/ruby/1.8;
+}
