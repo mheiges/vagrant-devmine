@@ -8,7 +8,8 @@
 
 
 - service: name='{{ redmine_db_service_provider }}'
-           state=started
+           enabled=yes
+           state=running
   sudo: yes
 
 - mysql_db: name='{{ redmine_db_name }}'

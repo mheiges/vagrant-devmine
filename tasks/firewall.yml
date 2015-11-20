@@ -1,6 +1,7 @@
 # iptables module due in Anisble 2.0
 # for now, just turn off
 - service: name=iptables
+           enabled=no
            state=stopped
   sudo: yes
 

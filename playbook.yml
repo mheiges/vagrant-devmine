@@ -3,11 +3,14 @@
   sudo: no
   gather_facts: True
   vars:
-    do_redmine_db_import: True
+    do_redmine_db_import: True  # import the redmine_db_dump_file ?
+    do_redmine_plugin_unmigrate: True # uninstall plugins?
+    do_dump_unmigrated_redmine_db: True # dump database to cache_dir after uninstalling plugins?
     cache_dir: /vagrant/scratch
     redmine_version: 2.3.2
     redmine_root_dir: /usr/local/redmine-2.3.2
     redmine_db_dump_file: '{{ cache_dir }}/redmine_dump.sql.gz'
+    redmine_db_unmigrated_dump_outfile: '{{ cache_dir }}/redmine_unmigrated_dump.sql.gz'
     redmine_db_service_provider: mysqld # or mariadb
     redmine_db_name: redmine
     redmine_db_host: localhost
@@ -27,37 +30,10 @@
     - include: tasks/system.yml
     - include: tasks/nginx.yml
     - include: tasks/database.yml
-
-    - yum: name=epel-release
-      sudo: yes
-
-    - yum: name='{{ item }}'
-      with_items:
-        - 'redmine-{{ redmine_version }}'
-      sudo: yes
-
-    - file: src='{{ redmine_root_dir }}'
-            dest=/usr/local/redmine
-            state=link
-      sudo: yes
-
-    - name: delete contents of redmine root directory
-      file: path='{{ redmine_root_dir }}'
-            state=absent
-      sudo: yes
-      when: redmine_db_created|changed
-
-    # generate an archive
-    #   ssh root@luffa.gacrc.uga.edu '(cd /usr/local; tar zcvf - redmine-2.3.2)' > scratch/redmine-2.3.2.tar.gz
-    - unarchive: src='{{ cache_dir }}/redmine-{{ redmine_version }}.tar.gz'
-                 dest='/usr/local/'
-                 copy=no
-      sudo: yes
-      when: true
-
-    - template: dest='{{ redmine_root_dir }}/config/database.yml'
-                src=templates/redmine_database_config.j2
-      sudo: yes
+    - include: tasks/firewall.yml
+    - include: tasks/redmine.yml
+    - include: tasks/unmigrate.yml
+      when: do_redmine_plugin_unmigrate == True
 
   handlers:
     - name: restart nginx

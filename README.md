@@ -8,6 +8,46 @@ versions, such as EasyRedmine.
 
 Once provisioned, Redmine should be available at http://devmine.vm.apidb.org/
 
+## Common task options
+
+#### Copy our production Redmine 2.x
+
+To make a reproduction of our production Redmine 2.x, add
+`scratch/redmine_dump.sql.gz` to the local project dir.
+
+In `playbook.yml` set vars
+    do_redmine_db_import: True
+    do_redmine_plugin_unmigrate: False
+    redmine_db_dump_file: <NAME OF redmine_dump.sql.gz>
+
+#### Copy and un-migrate our production Redmine 2.x
+
+To make a reproduction of our production Redmine 2.x and then remove all
+plugins to prepare the database for a different version of Redmine
+(e.g. EasyRedmine).
+
+Add `scratch/redmine_dump.sql.gz` to the local project dir.
+
+In `playbook.yml` set vars
+    do_redmine_db_import: True
+    do_redmine_plugin_unmigrate: True
+    do_dump_unmigrated_redmine_db: True
+    do_dump_unmigrated_redmine_db: True
+    redmine_db_dump_file: <NAME OF redmine_dump.sql.gz>
+    redmine_db_unmigrated_dump_outfile: '{{ cache_dir }}/redmine_unmigrated_dump.sql.gz'
+
+If `do_dump_unmigrated_redmine_db` is `True`, the cleaned database will
+be dumped to `redmine_db_unmigrated_dump_outfile`. This file can then be
+used for the other Redmine version you want to port to - for example, our
+EasyRedmine Vagrant project (https://github.com/mheiges/vagrant-easyredmine).
+
+##### Re-import database
+
+Once Ansible imports the `redmine_db_dump_file` it will skip the step on
+subsequent provisioning. To force it to import again either remove
+the `/tmp/redmine_db_import_success` file or drop the
+`redmine_db_name` database on the remote.
+
 ## Requirements
 
 - `scratch/redmine_dump.sql.gz` - a mysql dump of our production

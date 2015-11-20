@@ -32,5 +32,6 @@
   notify: restart nginx
 
 - service: name=nginx
-           state=started
+           enabled=yes
+           state=running
   sudo: yes

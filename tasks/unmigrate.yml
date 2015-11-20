@@ -1,0 +1,40 @@
+# Uninstall plugins and clean database to prepare it for
+# migration to another version of Redmine. Preparing
+# for Easy Redmine is the target use case.
+
+---
+
+- shell: "find . -mindepth 1 -maxdepth 1 -type d -not -name '*.bak'"
+  args:
+    chdir: '{{ redmine_root_dir }}/plugins'      
+  register: plugins
+  changed_when: False
+
+- name: Un-migrating plugins
+  command: 'rake redmine:plugins:migrate NAME={{ item }} VERSION=0 RAILS_ENV=production'
+  args:
+    chdir: '{{ redmine_root_dir }}'      
+  register: migration
+  with_items:
+    - "{{ plugins.stdout_lines | regex_replace('\\./', '') }}"
+  sudo: yes
+  environment:
+    GEM_PATH: '{{ redmine_root_dir }}/vendor/bundle/ruby/1.8'
+    PATH: '{{ redmine_root_dir }}/vendor/bundle/ruby/1.8/bin/:/usr/bin'
+
+- name: removing plugins directory
+  file: path='{{ redmine_root_dir }}/plugins'
+        state=absent
+  sudo: yes
+
+- name: adding empty plugins directory
+  file: path='{{ redmine_root_dir }}/plugins'
+        state=directory
+  notify: 'restart nginx'
+  sudo: yes
+
+- name: dumping unmigrated database
+  mysql_db: name='{{ redmine_db_name }}'
+            state=dump 
+            target='{{ redmine_db_unmigrated_dump_outfile }}'
+  when: do_dump_unmigrated_redmine_db == True
