@@ -9,8 +9,8 @@
     cache_dir: /vagrant/scratch
     redmine_version: 2.3.2
     redmine_root_dir: /usr/local/redmine-2.3.2
-    redmine_db_dump_file: '{{ cache_dir }}/redmine_dump.sql.gz'
-    redmine_db_unmigrated_dump_outfile: '{{ cache_dir }}/redmine_unmigrated_dump.sql.gz'
+    redmine_db_dump_file: '{{ cache_dir }}/redmine_2015-12-23_03h30m.pre-ezrm-migration.sql.gz'
+    redmine_db_unmigrated_dump_outfile: '{{ cache_dir }}/redmine_2015-12-23_03h30m.pre-ezrm-migration.unmigrated.sql.gz'
     redmine_db_service_provider: mysqld # or mariadb
     redmine_db_name: redmine
     redmine_db_host: localhost
