@@ -33,6 +33,23 @@
   notify: 'restart nginx'
   sudo: yes
 
+- name: install purge_custom_values task
+  copy: src=files/purge_custom_values.rake
+        dest='{{ redmine_root_dir }}/lib/tasks/purge_custom_values.rake'
+  sudo: yes
+
+  # remove custom_value rows that are orphaned from
+  # Projects that were deleted some time in the past.
+  # These orphans can interfere with migration to EasyRemine.
+- name: removing obsolete custom_values rows
+  command: rake redmine:purge_custom_values RAILS_ENV=production
+  args:
+    chdir: '{{ redmine_root_dir }}'
+  sudo: yes
+  environment:
+    GEM_PATH: '{{ redmine_root_dir }}/vendor/bundle/ruby/1.8'
+    PATH: '{{ redmine_root_dir }}/vendor/bundle/ruby/1.8/bin/:/usr/bin'
+
 - name: dumping unmigrated database
   mysql_db: name='{{ redmine_db_name }}'
             state=dump 
